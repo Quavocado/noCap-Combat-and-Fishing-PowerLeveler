@@ -75,6 +75,11 @@ public class FishingNode extends TaskNode {
                 || item.getName().contains("Raw pike")
                 || item.getName().contains("Raw salmon")
                 || item.getName().contains("Raw trout"))) >= fishCount) {
+            if (!getTabs().isOpen(Tab.INVENTORY)) {
+                if (getTabs().open(Tab.INVENTORY)) {
+                    sleepUntil(() -> getTabs().isOpen(Tab.INVENTORY), 2000);
+                }
+            }
 
             dropItems();
 
@@ -97,7 +102,7 @@ public class FishingNode extends TaskNode {
                         }
                     }
                 } else {
-                    if (Util.FISHING_REFERENCE.distance() > 2 && lowFishingSpot == null) {
+                    if (Util.FISHING_REFERENCE.distance() > 2 || lowFishingSpot == null) {
                         if (getWalking().isRunEnabled()) {
                             if (getWalking().walk(Util.FISHING_REFERENCE)) {
                                 Main.state = Main.State.WALKING;
@@ -135,7 +140,7 @@ public class FishingNode extends TaskNode {
                             }
                         }
                     } else {
-                        if (Util.FISHING_REFERENCE_HIGH.distance() > 2 && highFishingSpot == null) {
+                        if (Util.FISHING_REFERENCE_HIGH.distance() > 2 || highFishingSpot == null) {
                             if (player.getX() <= 3100) {
                                 if (!getTabs().isOpen(Tab.MAGIC)) {
                                     if (getTabs().open(Tab.MAGIC)) {
@@ -176,7 +181,7 @@ public class FishingNode extends TaskNode {
             if (!getInventory().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
                 getTabs().logout();
-                if (!getClient().getGameState().equals(GameState.LOGGED_IN)) {
+                if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
                     getClient().getInstance().getScriptManager().stop();
                 }
                 return false;
@@ -211,12 +216,12 @@ public class FishingNode extends TaskNode {
 
     private int lowFish() {
         int dropMin = 12;
-        int dropMax = 15;
+        int dropMax = 18;
         return Calculations.random(dropMin, dropMax);
     }
 
     private int highFish() {
-        int dropMin1 = 16;
+        int dropMin1 = 19;
         int dropMax2 = 28;
         return Calculations.random(dropMin1, dropMax2);
     }
@@ -233,7 +238,7 @@ public class FishingNode extends TaskNode {
      * 24 25 26 27 *
      * *************/
 
-    //Thank you Milisoft for this method :)
+    //Thank you someone on Dreambot for this method :)
     private void dropItems() {
         Main.state = Main.State.DROPPING_FISH;
         int[] dropOrder = getDropOrder();

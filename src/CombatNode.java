@@ -17,8 +17,6 @@ public class CombatNode extends TaskNode {
             "Iron scimitar"
     };
 
-
-
     @Override
     public int priority() {
         return 2;
@@ -108,7 +106,7 @@ public class CombatNode extends TaskNode {
             if (!getEquipment().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
                 getTabs().logout();
-                if (!getClient().getGameState().equals(GameState.LOGGED_IN)) {
+                if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
                     getClient().getInstance().getScriptManager().stop();
                 }
                 return false;
@@ -130,7 +128,11 @@ public class CombatNode extends TaskNode {
     }
 
     private void changeChop() {
-        getTabs().open(Tab.COMBAT);
+        if (!getTabs().isOpen(Tab.COMBAT)) {
+            if (getTabs().open(Tab.COMBAT)) {
+                sleepUntil(() -> getTabs().isOpen(Tab.COMBAT), 2000);
+            }
+        }
 
         WidgetChild chopWdgt = getWidgets().getWidgetChild(593, 4);
         if (chopWdgt != null) {
@@ -141,7 +143,11 @@ public class CombatNode extends TaskNode {
     }
 
     private void changeSlash() {
-        getTabs().open(Tab.COMBAT);
+        if (!getTabs().isOpen(Tab.COMBAT)) {
+            if (getTabs().open(Tab.COMBAT)) {
+                sleepUntil(() -> getTabs().isOpen(Tab.COMBAT), 2000);
+            }
+        }
 
         WidgetChild slashWdgt = getWidgets().getWidgetChild(593, 8);
         if (slashWdgt != null) {
@@ -152,7 +158,11 @@ public class CombatNode extends TaskNode {
     }
 
     private void changeBlock() {
-        getTabs().open(Tab.COMBAT);
+        if (!getTabs().isOpen(Tab.COMBAT)) {
+            if (getTabs().open(Tab.COMBAT)) {
+                sleepUntil(() -> getTabs().isOpen(Tab.COMBAT), 2000);
+            }
+        }
 
         WidgetChild blockWdgt = getWidgets().getWidgetChild(593, 16);
         if (blockWdgt != null) {
