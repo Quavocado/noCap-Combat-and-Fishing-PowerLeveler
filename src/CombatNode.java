@@ -40,7 +40,8 @@ public class CombatNode extends TaskNode {
         NPC seagull = getNpcs().closest(npc -> npc != null
                 && npc.canAttack()
                 && npc.getName().contains(npcName)
-                && !npc.isInCombat());
+                && !npc.isInCombat()
+                && !npc.isInteractedWith());
 
         Player player = getLocalPlayer();
 
@@ -59,7 +60,7 @@ public class CombatNode extends TaskNode {
         if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) < Main.attackLevel && getPlayerSettings().getConfig(43) != 0) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeChop();
-        } else if (getSkills().getRealLevel(Skill.STRENGTH) <= Main.strengthLevel && getPlayerSettings().getConfig(43) != 1) {
+        } else if (getSkills().getRealLevel(Skill.STRENGTH) < Main.strengthLevel && getPlayerSettings().getConfig(43) != 1) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeSlash();
         } else if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) >= Main.attackLevel && getSkills().getRealLevel(Skill.DEFENCE) < Main.defenceLevel && getPlayerSettings().getConfig(43) != 3) {
