@@ -58,13 +58,13 @@ public class CombatNode extends TaskNode {
         }
 
         //Attack Styles
-        if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getPlayerSettings().getConfig(43) != 0) {
+        if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.DEFENCE) <= Main.attackLevel && getPlayerSettings().getConfig(43) != 0) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeChop();
         } else if (getSkills().getRealLevel(Skill.STRENGTH) <= Main.strengthLevel && getPlayerSettings().getConfig(43) != 1) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeSlash();
-        } else if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) >= Main.attackLevel && getPlayerSettings().getConfig(43) != 3) {
+        } else if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) >= Main.attackLevel && getSkills().getRealLevel(Skill.DEFENCE) < Main.defenceLevel && getPlayerSettings().getConfig(43) != 3) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeBlock();
         }
