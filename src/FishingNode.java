@@ -1,4 +1,3 @@
-import org.dreambot.api.data.GameState;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.magic.Normal;
 import org.dreambot.api.methods.skills.Skill;
@@ -93,12 +92,12 @@ public class FishingNode extends TaskNode {
                     if (getSkills().getRealLevel(Skill.FISHING) < 5) {
                         if (lowFishingSpot.interact("Small Net")) {
                             Main.state = Main.State.FISHING;
-                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), Calculations.random(low, high));
+                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
                         }
                     } else if (getSkills().getRealLevel(Skill.FISHING) >= 5) {
                         if (lowFishingSpot.interact("Bait")) {
                             Main.state = Main.State.FISHING;
-                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), Calculations.random(low, high));
+                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
                         }
                     }
                 } else {
@@ -119,24 +118,24 @@ public class FishingNode extends TaskNode {
             }
         } else {
             if (getSkills().getRealLevel(Skill.FISHING) >= 20) {
-                if (player.isInteracting(highFishingSpot) || player.getAnimation() == 621 || player.getAnimation() == 623) {
+                if (player.isInteracting(highFishingSpot) || player.getAnimation() == 621 || player.getAnimation() == 623 || player.getAnimation() == 622) {
                     Main.state = Main.State.FISHING;
                 } else {
                     if (highFishingSpot != null && !player.isInteracting(highFishingSpot)) {
                         if (getSkills().getRealLevel(Skill.FISHING) >= 20 && getSkills().getRealLevel(Skill.FISHING) < 25) {
                             if (highFishingSpot.interact("Lure")) {
                                 Main.state = Main.State.FISHING;
-                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), Calculations.random(low, high));
+                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
                             }
                         } else if (getSkills().getRealLevel(Skill.FISHING) >= 25 && getSkills().getRealLevel(Skill.FISHING) < 30) {
                             if (highFishingSpot.interact("Bait")) {
                                 Main.state = Main.State.FISHING;
-                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), Calculations.random(low, high));
+                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
                             }
                         } else if (getSkills().getRealLevel(Skill.FISHING) >= 30) {
                             if (highFishingSpot.interact("Lure")) {
                                 Main.state = Main.State.FISHING;
-                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), Calculations.random(low, high));
+                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
                             }
                         }
                     } else {
@@ -180,27 +179,21 @@ public class FishingNode extends TaskNode {
         for (String s : strings) {
             if (!getInventory().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
-                if (getClient().getGameState().equals(GameState.LOGGED_IN)) {
-                    getTabs().logout();
-                }
-                if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
-                    getClient().getInstance().getScriptManager().stop();
-                    break;
-                }
-                return false;
+                getClient().getInstance().getScriptManager().stop();
+                break;
             }
         }
         return true;
     }
 
     private int low() {
-        int walkMin = 1500;
-        int walkMax = 2100;
+        int walkMin = 2000;
+        int walkMax = 2500;
         return Calculations.random(walkMin, walkMax);
     }
 
     private int high() {
-        int walkMin1 = 2101;
+        int walkMin1 = 2501;
         int walkMax2 = 3250;
         return Calculations.random(walkMin1, walkMax2);
     }
@@ -218,7 +211,7 @@ public class FishingNode extends TaskNode {
     }
 
     private int lowFish() {
-        int dropMin = 12;
+        int dropMin = 15;
         int dropMax = 18;
         return Calculations.random(dropMin, dropMax);
     }

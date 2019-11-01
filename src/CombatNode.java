@@ -1,4 +1,3 @@
-import org.dreambot.api.data.GameState;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.tabs.Tab;
@@ -106,14 +105,8 @@ public class CombatNode extends TaskNode {
         for (String s : strings) {
             if (!getEquipment().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
-                if (getClient().getGameState().equals(GameState.LOGGED_IN)) {
-                    getTabs().logout();
-                }
-                if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
-                    getClient().getInstance().getScriptManager().stop();
-                    break;
-                }
-                return false;
+                getClient().getInstance().getScriptManager().stop();
+                break;
             }
         }
         return true;
