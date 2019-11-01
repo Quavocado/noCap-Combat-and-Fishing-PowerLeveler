@@ -114,7 +114,7 @@ public class Main extends TaskScript {
 
         MouseSettings.setSpeed(Calculations.random(6, 8));
         getRandomManager().disableSolver(RandomEvent.DISMISS);
-        getWalking().setRunThreshold(Calculations.random(25, 30));
+        getWalking().setRunThreshold(Calculations.random(20, 30));
     }
 
 

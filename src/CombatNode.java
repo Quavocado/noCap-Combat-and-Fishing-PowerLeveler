@@ -106,9 +106,12 @@ public class CombatNode extends TaskNode {
         for (String s : strings) {
             if (!getEquipment().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
-                getTabs().logout();
+                if (getClient().getGameState().equals(GameState.LOGGED_IN)) {
+                    getTabs().logout();
+                }
                 if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
                     getClient().getInstance().getScriptManager().stop();
+                    break;
                 }
                 return false;
             }

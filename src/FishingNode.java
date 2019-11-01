@@ -57,7 +57,7 @@ public class FishingNode extends TaskNode {
 
         NPC highFishingSpot = getNpcs().closest(npc -> npc != null
                 && npc.hasAction(highLevelOptions)
-                && npc.getName().contains("Fishing spot")
+                && npc.getName().contains("Rod Fishing spot")
                 && npc.distance() < 20);
 
         Player player = getLocalPlayer();
@@ -180,9 +180,12 @@ public class FishingNode extends TaskNode {
         for (String s : strings) {
             if (!getInventory().contains(item -> item != null && !item.isNoted() && item.getName().contains(s))) {
                 log("Bot does not have required items. Stopping script and logging out.");
-                getTabs().logout();
+                if (getClient().getGameState().equals(GameState.LOGGED_IN)) {
+                    getTabs().logout();
+                }
                 if (getClient().getGameState().equals(GameState.LOGIN_SCREEN)) {
                     getClient().getInstance().getScriptManager().stop();
+                    break;
                 }
                 return false;
             }
