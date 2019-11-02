@@ -6,7 +6,9 @@ import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
 import org.dreambot.api.script.impl.TaskScript;
 
+import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 @ScriptManifest(author = "noCap",
         name = "noCap's Combat and Fishing Leveler",
@@ -18,7 +20,7 @@ public class Main extends TaskScript {
 
     private long startTime = 0;
     static State state;
-    private static String mode = null;
+    static String mode = null;
     private static int profileRoll = Calculations.random(1, 10);
     static boolean combat = false;
     static boolean fish = false;
@@ -27,6 +29,7 @@ public class Main extends TaskScript {
     static int strengthLevel = 0;
     static int defenceLevel = 0;
 
+    private GUI gui = new GUI();
 
     public enum Profile {
 
@@ -91,9 +94,9 @@ public class Main extends TaskScript {
         //getSkillTracker().start();
         state = State.UNDEFINED;
 
-        Main.mode = "Full";
-        Main.combat = true;
-        Main.fish = false;
+//        Main.mode = "Full";
+//        Main.combat = true;
+//        Main.fish = false;
 
         Profile profile;
         profile = getProfile();
@@ -107,6 +110,23 @@ public class Main extends TaskScript {
             Main.attackLevel = profile.getAttack();
             Main.strengthLevel = profile.getStrength();
             Main.defenceLevel = profile.getDefence();
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    gui = new GUI();
+                    gui.open();
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+                stop();
+                return;
+            }
+
+            // If the user closed the dialog and didn't click the Start button
+            if (!gui.isStarted()) {
+                log("Script not started");
+                stop();
+                return;
+            }
         } else {
             log("Profile Null. Contact noCap! Stopping script.");
             getClient().getInstance().getScriptManager().stop();
@@ -116,7 +136,6 @@ public class Main extends TaskScript {
         getRandomManager().disableSolver(RandomEvent.DISMISS);
         getWalking().setRunThreshold(Calculations.random(20, 30));
     }
-
 
     @Override
     public void onStart(String... args) {
@@ -186,6 +205,9 @@ public class Main extends TaskScript {
         log("----------------------------------------------------");
         log("   Stopped Script...");
         log("----------------------------------------------------");
+        if (gui != null) {
+            gui.close();
+        }
         //getSkillTracker().resetAll();
         state = null;
         combat = false;
