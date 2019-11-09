@@ -67,6 +67,12 @@ public class CombatNode extends TaskNode {
             changeBlock();
         }
 
+        if (!getTabs().isOpen(Tab.INVENTORY)) {
+            if (getTabs().open(Tab.INVENTORY)) {
+                sleepUntil(() -> getTabs().isOpen(Tab.INVENTORY), 2000);
+            }
+        }
+
         if (!Util.SEAGULL_COMBAT_AREA.contains(player) && !player.isInCombat()) {
             if (getWalking().isRunEnabled()) {
                 if (getWalking().walk(Util.SEAGULL_COMBAT_AREA.getCenter())) {

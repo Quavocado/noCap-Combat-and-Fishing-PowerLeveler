@@ -1,3 +1,4 @@
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.magic.Normal;
 import org.dreambot.api.methods.skills.Skill;
@@ -45,21 +46,38 @@ public class FishingNode extends TaskNode {
 
     @Override
     public int execute() {
-        int high = high();
-        int low = low();
+        int high = highWalk();
+        logInfo("highWalk: " + high);
+        int low = lowWalk();
+        logInfo("lowWalk: " + low);
         int fishCount = Calculations.random(lowFish(), highFish());
+        logInfo("fishCount: " + fishCount);
 
         NPC lowFishingSpot = getNpcs().closest(npc -> npc != null
-                && npc.hasAction(lowLevelOptions)
-                && npc.getName().contains("Fishing spot")
-                && npc.distance() < 20);
+                        && npc.hasAction(lowLevelOptions)
+                        && npc.getName().contains("Fishing spot")
+                /*&& npc.distance() < 15*/);
 
         NPC highFishingSpot = getNpcs().closest(npc -> npc != null
                 && npc.hasAction(highLevelOptions)
                 && npc.getName().contains("Rod Fishing spot")
-                && npc.distance() < 20);
+                && npc.distance() < 15);
 
         Player player = getLocalPlayer();
+
+        if (getKeyboard().isHoldingShift()) {
+            getKeyboard().releaseShift();
+        }
+
+        if (getInventory().isItemSelected()) {
+            sleepUntil(() -> getInventory().deselect(), 2000);
+        }
+
+        if (!getTabs().isOpen(Tab.INVENTORY)) {
+            if (getTabs().open(Tab.INVENTORY)) {
+                sleepUntil(() -> getTabs().isOpen(Tab.INVENTORY), 2000);
+            }
+        }
 
         if (getDialogues().canContinue()) {
             if (getDialogues().continueDialogue()) {
@@ -88,16 +106,22 @@ public class FishingNode extends TaskNode {
             if (player.isInteracting(lowFishingSpot) || player.getAnimation() == 621 || player.getAnimation() == 623) {
                 Main.state = Main.State.FISHING;
             } else {
-                if (lowFishingSpot != null && !player.isInteracting(lowFishingSpot) && player.getX() <= 3100) {
-                    if (getSkills().getRealLevel(Skill.FISHING) < 5) {
-                        if (lowFishingSpot.interact("Small Net")) {
-                            Main.state = Main.State.FISHING;
-                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
+                if (lowFishingSpot != null && !player.isInteracting(lowFishingSpot) && player.getX() <= 3002) {
+                    if (!lowFishingSpot.isOnScreen() || lowFishingSpot.distance() > 15) {
+                        if (getWalking().walk(lowFishingSpot)) {
+                            sleepUntil(() -> lowFishingSpot.distance() < 15 || lowFishingSpot.isOnScreen(), Calculations.random(low, high));
                         }
-                    } else if (getSkills().getRealLevel(Skill.FISHING) >= 5) {
-                        if (lowFishingSpot.interact("Bait")) {
-                            Main.state = Main.State.FISHING;
-                            sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
+                    } else {
+                        if (getSkills().getRealLevel(Skill.FISHING) < 5) {
+                            if (lowFishingSpot.interact("Small Net")) {
+                                Main.state = Main.State.FISHING;
+                                sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
+                            }
+                        } else if (getSkills().getRealLevel(Skill.FISHING) >= 5) {
+                            if (lowFishingSpot.interact("Bait")) {
+                                Main.state = Main.State.FISHING;
+                                sleepUntil(() -> player.isInteracting(lowFishingSpot) || getInventory().isFull(), 5000);
+                            }
                         }
                     }
                 } else {
@@ -127,12 +151,7 @@ public class FishingNode extends TaskNode {
                                 Main.state = Main.State.FISHING;
                                 sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
                             }
-                        } else if (getSkills().getRealLevel(Skill.FISHING) >= 25 && getSkills().getRealLevel(Skill.FISHING) < 30) {
-                            if (highFishingSpot.interact("Bait")) {
-                                Main.state = Main.State.FISHING;
-                                sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
-                            }
-                        } else if (getSkills().getRealLevel(Skill.FISHING) >= 30) {
+                        } else if (getSkills().getRealLevel(Skill.FISHING) >= 25) {
                             if (highFishingSpot.interact("Lure")) {
                                 Main.state = Main.State.FISHING;
                                 sleepUntil(() -> player.isInteracting(highFishingSpot) || getInventory().isFull(), 5000);
@@ -171,7 +190,7 @@ public class FishingNode extends TaskNode {
             }
         }
 
-        return Calculations.random(200, 400);
+        return Calculations.random(250, 400);
     }
 
     //Thank you Xephy for this method :)
@@ -186,16 +205,16 @@ public class FishingNode extends TaskNode {
         return true;
     }
 
-    private int low() {
+    private int lowWalk() {
         int walkMin = 2000;
         int walkMax = 2500;
         return Calculations.random(walkMin, walkMax);
     }
 
-    private int high() {
-        int walkMin1 = 2501;
-        int walkMax2 = 3250;
-        return Calculations.random(walkMin1, walkMax2);
+    private int highWalk() {
+        int walkMin = 2501;
+        int walkMax = 3250;
+        return Calculations.random(walkMin, walkMax);
     }
 
     private int lowDrop() {
@@ -205,34 +224,22 @@ public class FishingNode extends TaskNode {
     }
 
     private int highDrop() {
-        int dropMin1 = 55;
-        int dropMax2 = 80;
-        return Calculations.random(dropMin1, dropMax2);
+        int dropMin = 55;
+        int dropMax = 80;
+        return Calculations.random(dropMin, dropMax);
     }
 
     private int lowFish() {
-        int dropMin = 15;
-        int dropMax = 18;
+        int dropMin = 17;
+        int dropMax = 20;
         return Calculations.random(dropMin, dropMax);
     }
 
     private int highFish() {
-        int dropMin1 = 19;
-        int dropMax2 = 28;
-        return Calculations.random(dropMin1, dropMax2);
+        int dropMin = 21;
+        int dropMax = 35;
+        return Calculations.random(dropMin, dropMax);
     }
-
-    /*
-     * Inventory Layout
-     * *************
-     * 0  1  2  3  *
-     * 4  5  6  7  *
-     * 8  9  10 11 *
-     * 12 13 14 15 *
-     * 16 17 18 19 *
-     * 20 21 22 23 *
-     * 24 25 26 27 *
-     * *************/
 
     //Thank you someone on Dreambot for this method :)
     private void dropItems() {
@@ -258,12 +265,25 @@ public class FishingNode extends TaskNode {
         getKeyboard().releaseShift();
     }
 
+    /*
+     * Inventory Layout
+     * *************
+     * 0  1  2  3  *
+     * 4  5  6  7  *
+     * 8  9  10 11 *
+     * 12 13 14 15 *
+     * 16 17 18 19 *
+     * 20 21 22 23 *
+     * 24 25 26 27 *
+     * *************/
+
     private int[] getDropOrder() {
-        int roll = Calculations.random(1, 4);
+        int roll = Calculations.random(1, 5);
         int[] dropOrder = {0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12, 16, 17, 18, 19, 23, 22, 21, 20, 24, 25, 26, 27};
         int[] dropOrder2 = {3, 2, 1, 0, 4, 5, 6, 7, 11, 10, 9, 8, 12, 13, 14, 15, 19, 18, 17, 16, 20, 21, 22, 23, 27, 26, 25, 24};
         int[] dropOrder3 = {0, 4, 1, 5, 2, 6, 3, 7, 8, 12, 9, 13, 10, 14, 11, 15, 16, 20, 17, 21, 18, 22, 19, 23, 24, 25, 26, 27};
         int[] dropOrder4 = {0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21, 24, 25, 2, 3, 6, 7, 10, 11, 14, 15, 18, 19, 22, 23, 26, 27};
+        int[] dropOrder5 = {0, 1, 2, 3, 7, 6, 5, 4, 8, 12, 9, 13, 10, 14, 11, 15, 16, 17, 18, 19, 20, 24, 21, 25, 22, 26, 23, 27};
         switch (roll) {
             case 1: {
                 return dropOrder;
@@ -276,6 +296,9 @@ public class FishingNode extends TaskNode {
             }
             case 4: {
                 return dropOrder4;
+            }
+            case 5: {
+                return dropOrder5;
             }
             default: {
                 return null;

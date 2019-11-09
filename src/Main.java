@@ -1,3 +1,4 @@
+import org.dreambot.api.data.GameState;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.input.mouse.MouseSettings;
 import org.dreambot.api.methods.skills.Skill;
@@ -24,12 +25,13 @@ public class Main extends TaskScript {
     private static int profileRoll = Calculations.random(1, 10);
     static boolean combat = false;
     static boolean fish = false;
+    static boolean started;
 
-    static int attackLevel = 0;
-    static int strengthLevel = 0;
-    static int defenceLevel = 0;
+    static int attackLevel;
+    static int strengthLevel;
+    static int defenceLevel;
 
-    private GUI gui = new GUI();
+    private GUI gui;
 
     public enum Profile {
 
@@ -75,6 +77,7 @@ public class Main extends TaskScript {
         CHANGING_COMBAT_STYLE,
         FINDING_TARGET,
         ATTACKING_SEAGULL,
+        PRESTART,
         UNDEFINED
 
     }
@@ -89,50 +92,68 @@ public class Main extends TaskScript {
 
         Main.state = State.UNDEFINED;
 
-        startTime = System.currentTimeMillis();
-        //getSkillTracker().resetAll();
-        //getSkillTracker().start();
-        state = State.UNDEFINED;
+        while ((!getClient().getGameState().equals(GameState.LOGGED_IN) /*!started*/ ) && getClient().getInstance().getScriptManager().isRunning()) {
 
-//        Main.mode = "Full";
-//        Main.combat = true;
-//        Main.fish = false;
+        }
+        sleep(1200);
+
+        startTime = System.currentTimeMillis();
+        state = State.UNDEFINED;
 
         Profile profile;
         profile = getProfile();
+
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                gui = new GUI();
+                gui.open();
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+            stop();
+            return;
+        }
+
+        if (profile != null) {
+
+            attackLevel = gui.getAttackLevel();
+            strengthLevel = gui.getStrengthLevel();
+            defenceLevel = gui.getDefenceLevel();
+
+            if (attackLevel <= 0 || attackLevel > 99) {
+                attackLevel = profile.getAttack();
+            } else {
+                attackLevel = gui.getAttackLevel();
+            }
+            if (strengthLevel <= 0 || strengthLevel > 99) {
+                strengthLevel = profile.getStrength();
+            } else {
+                strengthLevel = gui.getStrengthLevel();
+            }
+            if (defenceLevel <= 0 || defenceLevel > 99) {
+                defenceLevel = profile.getDefence();
+            } else {
+                defenceLevel = gui.getDefenceLevel();
+            }
+
+        } else {
+            log("Profile Null. Contact noCap! Stopping script.");
+            getClient().getInstance().getScriptManager().stop();
+        }
+
+        // If the user closed the dialog and didn't click the Start button
+        if (!gui.isStarted()) {
+            log("Script not started");
+            stop();
+            return;
+        }
 
         addNodes(
                 new CombatNode(),
                 new FishingNode()
         );
 
-        if (profile != null) {
-            Main.attackLevel = profile.getAttack();
-            Main.strengthLevel = profile.getStrength();
-            Main.defenceLevel = profile.getDefence();
-            try {
-                SwingUtilities.invokeAndWait(() -> {
-                    gui = new GUI();
-                    gui.open();
-                });
-            } catch (InterruptedException | InvocationTargetException e) {
-                e.printStackTrace();
-                stop();
-                return;
-            }
-
-            // If the user closed the dialog and didn't click the Start button
-            if (!gui.isStarted()) {
-                log("Script not started");
-                stop();
-                return;
-            }
-        } else {
-            log("Profile Null. Contact noCap! Stopping script.");
-            getClient().getInstance().getScriptManager().stop();
-        }
-
-        MouseSettings.setSpeed(Calculations.random(6, 8));
+        MouseSettings.setSpeed(Calculations.random(7, 10));
         getRandomManager().disableSolver(RandomEvent.DISMISS);
         getWalking().setRunThreshold(Calculations.random(20, 30));
     }
@@ -147,6 +168,11 @@ public class Main extends TaskScript {
 
         Main.state = State.UNDEFINED;
 
+        while ((!getClient().getGameState().equals(GameState.LOGGED_IN)) && getClient().getInstance().getScriptManager().isRunning()) {
+
+        }
+        sleep(2500);
+
         startTime = System.currentTimeMillis();
         //getSkillTracker().resetAll();
         //getSkillTracker().start();
@@ -155,11 +181,6 @@ public class Main extends TaskScript {
 
         mode = args[0];
 
-        addNodes(
-                new CombatNode(),
-                new FishingNode()
-        );
-
         if (mode.equalsIgnoreCase("full")) {
             Main.combat = true;
             Main.fish = false;
@@ -167,9 +188,9 @@ public class Main extends TaskScript {
             if (profile != null) {
                 log("Mode : " + mode);
                 log("You are using Profile : " + profile);
-                Main.attackLevel = profile.getAttack();
-                Main.strengthLevel = profile.getStrength();
-                Main.defenceLevel = profile.getDefence();
+                attackLevel = profile.getAttack();
+                strengthLevel = profile.getStrength();
+                defenceLevel = profile.getDefence();
             } else {
                 log("Profile Null. Contact noCap! Stopping script.");
                 getClient().getInstance().getScriptManager().stop();
@@ -193,6 +214,13 @@ public class Main extends TaskScript {
             log("Mode : " + mode);
             Main.fish = true;
         }
+
+        addNodes(
+                new CombatNode(),
+                new FishingNode()
+        );
+
+        started = true;
 
         MouseSettings.setSpeed(Calculations.random(6, 8));
         getRandomManager().disableSolver(RandomEvent.DISMISS);
@@ -223,20 +251,21 @@ public class Main extends TaskScript {
     public void onPaint(Graphics g) {
         g.setColor(Color.WHITE);
         long runTime = System.currentTimeMillis() - startTime;
-        g.drawString("Runtime: " + formatTime(runTime), 12, 60);
-        g.drawString("State: " + state, 12, 75);
-        g.drawString("Mode: " + Main.mode, 12, 90);
-        g.drawString("Fishing Level: " + getSkills().getRealLevel(Skill.FISHING), 12, 105);
+        if (started) {
+            g.drawString("Runtime: " + formatTime(runTime), 12, 60);
+            g.drawString("State: " + state, 12, 75);
+            g.drawString("Mode: " + Main.mode, 12, 90);
+            g.drawString("Fishing Level: " + getSkills().getRealLevel(Skill.FISHING), 12, 105);
 
-        g.drawString("Your target Attack Level is: " + Main.attackLevel, 12, 120);
-        g.drawString("Current Attack Level: " + getSkills().getRealLevel(Skill.ATTACK), 12, 135);
+            g.drawString("Your target Attack Level is: " + attackLevel, 12, 120);
+            g.drawString("Current Attack Level: " + getSkills().getRealLevel(Skill.ATTACK), 12, 135);
 
-        g.drawString("Your target Strength Level is: " + Main.strengthLevel, 12, 150);
-        g.drawString("Current Strength Level: " + getSkills().getRealLevel(Skill.STRENGTH), 12, 165);
+            g.drawString("Your target Strength Level is: " + strengthLevel, 12, 150);
+            g.drawString("Current Strength Level: " + getSkills().getRealLevel(Skill.STRENGTH), 12, 165);
 
-        g.drawString("Your target Defence Level is: " + Main.defenceLevel, 12, 180);
-        g.drawString("Current Defence Level: " + getSkills().getRealLevel(Skill.DEFENCE), 12, 195);
-
+            g.drawString("Your target Defence Level is: " + defenceLevel, 12, 180);
+            g.drawString("Current Defence Level: " + getSkills().getRealLevel(Skill.DEFENCE), 12, 195);
+        }
     }
 
     private String formatTime(final long ms) {

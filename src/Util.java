@@ -9,5 +9,4 @@ class Util {
     static final Tile FISHING_REFERENCE = new Tile(2996, 3162);
     static final Tile FISHING_REFERENCE_HIGH = new Tile(3241, 3246);
 
-
 }
