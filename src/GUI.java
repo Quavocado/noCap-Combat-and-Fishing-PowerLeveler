@@ -12,9 +12,6 @@ class GUI extends JFrame {
     private final JTextField attackLevelText;
     private final JTextField strengthLevelText;
     private final JTextField defenceLevelText;
-    private final JLabel attackLevelLabel;
-    private final JLabel strengthLevelLabel;
-    private final JLabel defenceLevelLabel;
     private boolean started;
 
     GUI() {
@@ -39,7 +36,7 @@ class GUI extends JFrame {
         mainPanel.add(fish);
         groupButton();
 
-        attackLevelLabel = new JLabel("Attack Level:");
+        JLabel attackLevelLabel = new JLabel("Attack Level: (Value less than 99)");
         attackLevelText = new JTextField(1);
         attackLevelText.addKeyListener(new KeyAdapter() {
             @Override
@@ -51,7 +48,7 @@ class GUI extends JFrame {
             }
         });
 
-        strengthLevelLabel = new JLabel("Strength Level:");
+        JLabel strengthLevelLabel = new JLabel("Strength Level: (Value less than 99)");
         strengthLevelText = new JTextField(1);
         strengthLevelText.addKeyListener(new KeyAdapter() {
             @Override
@@ -63,7 +60,7 @@ class GUI extends JFrame {
             }
         });
 
-        defenceLevelLabel = new JLabel("Defence Level:");
+        JLabel defenceLevelLabel = new JLabel("Defence Level: (Value less than 99)");
         defenceLevelText = new JTextField(1);
         defenceLevelText.addKeyListener(new KeyAdapter() {
             @Override

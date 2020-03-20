@@ -40,7 +40,8 @@ public class CombatNode extends TaskNode {
                 && npc.canAttack()
                 && npc.getName().contains(npcName)
                 && !npc.isInCombat()
-                && !npc.isInteractedWith());
+                && !npc.isInteractedWith()
+                && npc.getInteractingIndex() == -1);
 
         Player player = getLocalPlayer();
 
@@ -55,14 +56,18 @@ public class CombatNode extends TaskNode {
             Main.fish = true;
         }
 
+        int currentStrengthLevel = getSkills().getRealLevel(Skill.STRENGTH);
+        int currentAttackLevel = getSkills().getRealLevel(Skill.ATTACK);
+        int currentDefenceLevel = getSkills().getRealLevel(Skill.DEFENCE);
         //Attack Styles
-        if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) < Main.attackLevel && getPlayerSettings().getConfig(43) != 0) {
-            Main.state = Main.State.CHANGING_COMBAT_STYLE;
-            changeChop();
-        } else if (getSkills().getRealLevel(Skill.STRENGTH) < Main.strengthLevel && getPlayerSettings().getConfig(43) != 1) {
+
+        if (currentStrengthLevel < Main.strengthLevel && getPlayerSettings().getConfig(43) != 1) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeSlash();
-        } else if (getSkills().getRealLevel(Skill.STRENGTH) >= Main.strengthLevel && getSkills().getRealLevel(Skill.ATTACK) >= Main.attackLevel && getSkills().getRealLevel(Skill.DEFENCE) < Main.defenceLevel && getPlayerSettings().getConfig(43) != 3) {
+        } else if (currentStrengthLevel >= Main.strengthLevel && currentAttackLevel < Main.attackLevel && getPlayerSettings().getConfig(43) != 0) {
+            Main.state = Main.State.CHANGING_COMBAT_STYLE;
+            changeChop();
+        } else if (currentStrengthLevel >= Main.strengthLevel && currentAttackLevel >= Main.attackLevel && currentDefenceLevel < Main.defenceLevel && getPlayerSettings().getConfig(43) != 3) {
             Main.state = Main.State.CHANGING_COMBAT_STYLE;
             changeBlock();
         }

@@ -1,4 +1,3 @@
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.magic.Normal;
 import org.dreambot.api.methods.skills.Skill;
@@ -56,7 +55,7 @@ public class FishingNode extends TaskNode {
         NPC lowFishingSpot = getNpcs().closest(npc -> npc != null
                         && npc.hasAction(lowLevelOptions)
                         && npc.getName().contains("Fishing spot")
-                /*&& npc.distance() < 15*/);
+                /*      && npc.distance() < 15*/);
 
         NPC highFishingSpot = getNpcs().closest(npc -> npc != null
                 && npc.hasAction(highLevelOptions)
